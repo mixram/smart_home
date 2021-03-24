@@ -30,7 +30,7 @@ bool light1IsOn = false;
 bool light2IsOn = false;
 bool light3IsOn = false;
 
-/*MY_SENSORS_ACTUATORS*/
+  /*MY_SENSORS_ACTUATORS*/
 const int CHILD_ACTUATOR_ID_LIGHT1 = 4;
 const int CHILD_ACTUATOR_ID_LIGHT2 = 5;
 const int CHILD_ACTUATOR_ID_LIGHT3 = 6;
@@ -41,6 +41,8 @@ MyMessage msgLight3(CHILD_ACTUATOR_ID_LIGHT3, V_STATUS);
 
 /*OTHER*/
 bool printAccepted = true;
+int connectAttemptscounter = 0;
+const int ACCEPTED_CONNECTION_ATTEMPTS = 20;
 
 void before()
 {
@@ -58,8 +60,8 @@ void before()
 
 void setup()
 {
-  Serial.begin(115200);
-  // Serial.begin(9600);
+  // Serial.begin(115200);
+  Serial.begin(9600);
   // while (Serial.available())
   //   ;
 }
@@ -74,7 +76,7 @@ void presentation()
 
 void loop()
 {
-  if (!initialValueSent)
+  if (!initialValueSent && connectAttemptscounter < ACCEPTED_CONNECTION_ATTEMPTS)
   {
     print("Sending initial value");
     send(msgLight1.set(light1IsOn));
@@ -85,6 +87,9 @@ void loop()
     request(CHILD_ACTUATOR_ID_LIGHT1, V_STATUS);
     request(CHILD_ACTUATOR_ID_LIGHT2, V_STATUS);
     request(CHILD_ACTUATOR_ID_LIGHT3, V_STATUS);
+
+    connectAttemptscounter++;
+    print("Connection attempt " + String(connectAttemptscounter) + " out of " + String(ACCEPTED_CONNECTION_ATTEMPTS));
 
     wait(2000, C_SET, V_STATUS);
   }
