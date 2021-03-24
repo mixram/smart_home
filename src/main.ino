@@ -59,7 +59,7 @@ MyMessage msgHallLight(CHILD_ACTUATOR_ID_HALL_LIGHT, V_STATUS);
 MyMessage msgDinningLight(CHILD_ACTUATOR_ID_DINING_LIGHT, V_STATUS);
 MyMessage msgBedroomLight(CHILD_ACTUATOR_ID_BEDROOM_LIGHT, V_STATUS);
 MyMessage msgSconce1Light(CHILD_ACTUATOR_ID_SCONCE1_LIGHT, V_STATUS);
-MyMessage msgSconce1Light(CHILD_ACTUATOR_ID_SCONCE2_LIGHT, V_STATUS);
+MyMessage msgSconce2Light(CHILD_ACTUATOR_ID_SCONCE2_LIGHT, V_STATUS);
 
 /*INPUTS STATES*/
 bool hallwayLastState = LOW;
@@ -175,16 +175,16 @@ void loop()
   {
     print("Sending initial value");
     send(msgHallwayLight.set(hallwayLightIsOn));
-    send(msgBathroomFan.set(hallLightIsOn));
+    send(msgBathroomFan.set(bathroomFanIsOn));
     send(msgBathroomLight.set(bathroomLightIsOn));
-    send(msgKitchenMainLight.set(bathroomFanIsOn));
-    send(msgKitchenAddLight.set(kitchenMainLightIsOn));
-    send(msgKitchenBackLight.set(kitchenAddLightIsOn));
-    send(msgHallLight.set(kitchenBackLightIsOn));
+    send(msgKitchenMainLight.set(kitchenMainLightIsOn));
+    send(msgKitchenAddLight.set(kitchenAddLightIsOn));
+    send(msgKitchenBackLight.set(kitchenBackLightIsOn));
+    send(msgHallLight.set(hallLightIsOn));
     send(msgDinningLight.set(diningLightIsOn));
     send(msgBedroomLight.set(bedroomLightIsOn));
     send(msgSconce1Light.set(sconce1IsOn));
-    send(msgSconce1Light.set(sconce2IsOn));
+    send(msgSconce2Light.set(sconce2IsOn));
 
     print("Requesting initial value from controller");
     request(CHILD_ACTUATOR_ID_HALLWAY_LIGHT, V_STATUS);
@@ -220,19 +220,25 @@ void loop()
   /*HALLWAY+HALL*/
   if (hallwayLastState == LOW && hallwayCurrState == HIGH)
   {
-    print(String(BTN_HALLWAY_PIN_I) + " is pressed.");
+    print("BTN_HALLWAY_PIN_I is pressed.");
 
     delay(400);
 
     hallwayCurrState = debounce(hallwayLastState, BTN_HALLWAY_PIN_I);
     if (hallwayCurrState == HIGH)
     {
-      print(String(BTN_HALLWAY_PIN_I) + " is still pressed!");
+      print("BTN_HALLWAY_PIN_I is still pressed!");
 
       if (hallwayLightIsOn == false || hallLightIsOn == false)
       {
         hallwayLightIsOn = true;
         hallLightIsOn = true;
+        bathroomLightIsOn = true;
+        bathroomFanIsOn = true;
+        kitchenMainLightIsOn = true;
+        kitchenAddLightIsOn = true;
+        kitchenBackLightIsOn = true;
+        diningLightIsOn = true;
       }
       else
       {
@@ -247,19 +253,25 @@ void loop()
 
     send(msgHallwayLight.set(hallwayLightIsOn), true);
     send(msgHallLight.set(hallLightIsOn), true);
+    send(msgBathroomLight.set(bathroomLightIsOn), true);
+    send(msgBathroomFan.set(bathroomFanIsOn), true);
+    send(msgKitchenMainLight.set(kitchenMainLightIsOn), true);
+    send(msgKitchenAddLight.set(kitchenAddLightIsOn), true);
+    send(msgKitchenBackLight.set(kitchenBackLightIsOn), true);
+    send(msgDinningLight.set(diningLightIsOn), true);
   }
 
   /*HALL+DINNING*/
   if (hallLastState == LOW && hallCurrState == HIGH)
   {
-    print(String(BTN_HALL_PIN_I) + " is pressed.");
+    print("BTN_HALL_PIN_I is pressed.");
 
     delay(400);
 
     hallCurrState = debounce(hallLastState, BTN_HALL_PIN_I);
     if (hallCurrState == HIGH)
     {
-      print(String(BTN_HALL_PIN_I) + " is still pressed!");
+      print("BTN_HALL_PIN_I is still pressed!");
 
       diningLightIsOn = !diningLightIsOn;
       print("diningLightIsOn=" + String(diningLightIsOn));
@@ -295,6 +307,9 @@ void loop()
       bathroomLightIsOn = !bathroomLightIsOn;
       print("bathroomLightIsOn=" + String(bathroomLightIsOn));
     }
+
+    send(msgBathroomFan.set(bathroomFanIsOn), true);
+    send(msgBathroomLight.set(bathroomLightIsOn), true);
   }
   //botton2
   if (bathroom2LastState == LOW && bathroom2CurrState == HIGH)
@@ -314,6 +329,9 @@ void loop()
     {
       bathroomLightIsOn = !bathroomLightIsOn;
     }
+
+    send(msgBathroomFan.set(bathroomFanIsOn), true);
+    send(msgBathroomLight.set(bathroomLightIsOn), true);
   }
 
   /*KITCHEN*/
@@ -352,6 +370,10 @@ void loop()
       kitchenMainLightIsOn = !kitchenMainLightIsOn;
       print("kitchenMainLightIsOn=" + String(kitchenMainLightIsOn));
     }
+
+    send(msgKitchenAddLight.set(kitchenAddLightIsOn), true);
+    send(msgKitchenBackLight.set(kitchenBackLightIsOn), true);
+    send(msgKitchenMainLight.set(kitchenMainLightIsOn), true);
   }
 
   /*BEDROOM+SCONCES*/
@@ -382,6 +404,10 @@ void loop()
     {
       bedroomLightIsOn = !bedroomLightIsOn;
     }
+
+    send(msgSconce1Light.set(sconce1IsOn), true);
+    send(msgSconce2Light.set(sconce2IsOn), true);
+    send(msgBedroomLight.set(bedroomLightIsOn), true);
   }
   //buttonM
   if (bedroomMLastState == LOW && bedroomMCurrState == HIGH)
@@ -401,6 +427,9 @@ void loop()
     {
       hallLightIsOn = !hallLightIsOn;
     }
+
+    send(msgDinningLight.set(diningLightIsOn), true);
+    send(msgHallLight.set(hallLightIsOn), true);
   }
   //buttonB
   if (bedroomBLastState == LOW && bedroomBCurrState == HIGH)
@@ -427,6 +456,15 @@ void loop()
     {
       hallwayLightIsOn = !hallwayLightIsOn;
     }
+
+    send(msgHallwayLight.set(hallwayLightIsOn), true);
+    send(msgHallLight.set(hallLightIsOn), true);
+    send(msgBathroomLight.set(bathroomLightIsOn), true);
+    send(msgBathroomFan.set(bathroomFanIsOn), true);
+    send(msgKitchenMainLight.set(kitchenMainLightIsOn), true);
+    send(msgKitchenAddLight.set(kitchenAddLightIsOn), true);
+    send(msgKitchenBackLight.set(kitchenBackLightIsOn), true);
+    send(msgDinningLight.set(diningLightIsOn), true);
   }
 
   /*SCONCE1+BEDROOM*/
@@ -447,6 +485,9 @@ void loop()
     {
       sconce1IsOn = !sconce1IsOn;
     }
+
+    send(msgBedroomLight.set(bedroomLightIsOn), true);
+    send(msgSconce1Light.set(sconce1IsOn), true);
   }
 
   /*SCONCE2+BEDROOM*/
@@ -467,6 +508,9 @@ void loop()
     {
       sconce2IsOn = !sconce2IsOn;
     }
+
+    send(msgBedroomLight.set(bedroomLightIsOn), true);
+    send(msgSconce2Light.set(sconce2IsOn), true);
   }
 
   //set HALLWAY_LIGHT_RELAY_PIN_O state
@@ -503,6 +547,79 @@ void loop()
   bedroomBLastState = bedroomBCurrState;
   sconce1LastState = sconce1CurrState;
   sconce2LastState = sconce2CurrState;
+}
+
+void receive(const MyMessage &message) {
+  if (message.isAck())
+  {
+    print("This is an ack from gateway");
+  }
+
+  if (message.type == V_STATUS) {
+    if (!initialValueSent)
+    {
+      print("Receiving initial value from controller");
+      initialValueSent = true;
+    }
+
+    uint8_t sensor = message.sensor;
+    uint8_t value = message.getBool();
+    if (sensor == CHILD_ACTUATOR_ID_HALLWAY_LIGHT)
+    {
+      hallwayLightIsOn = value;
+      digitalWrite(HALLWAY_LIGHT_RELAY_PIN_O, hallwayLightIsOn);
+    }
+    else if (sensor == CHILD_ACTUATOR_ID_BATHROOM_FAN)
+    {
+      bathroomFanIsOn = value;
+      digitalWrite(BATHROOM_FAN_RELAY_PIN_O, bathroomFanIsOn);
+    }
+    else if (sensor == CHILD_ACTUATOR_ID_BATHROOM_LIGHT)
+    {
+      bathroomLightIsOn = value;
+      digitalWrite(BATHROOM_LIGHT_RELAY_PIN_O, bathroomLightIsOn);
+    }
+    else if (sensor == CHILD_ACTUATOR_ID_KITCHEN_MAIN)
+    {
+      kitchenMainLightIsOn = value;
+      digitalWrite(KITCHEN_MAIN_RELAY_PIN_O, kitchenMainLightIsOn);
+    }
+    else if (sensor == CHILD_ACTUATOR_ID_KITCHEN_ADD)
+    {
+      kitchenAddLightIsOn = value;
+      digitalWrite(KITCHEN_ADD_RELAY_PIN_O, kitchenAddLightIsOn);
+    }
+    else if (sensor == CHILD_ACTUATOR_ID_KITCHEN_BACKLIGHT)
+    {
+      kitchenBackLightIsOn = value;
+      digitalWrite(KITCHEN_BACKLIGHT_RELAY_PIN_O, kitchenBackLightIsOn);
+    }
+    else if (sensor == CHILD_ACTUATOR_ID_HALL_LIGHT)
+    {
+      hallLightIsOn = value;
+      digitalWrite(HALL_LIGHT_RELAY_PIN_O, hallLightIsOn);
+    }
+    else if (sensor == CHILD_ACTUATOR_ID_DINING_LIGHT)
+    {
+      diningLightIsOn = value;
+      digitalWrite(DINING_LIGHT_RELAY_PIN_O, diningLightIsOn);
+    }
+    else if (sensor == CHILD_ACTUATOR_ID_BEDROOM_LIGHT)
+    {
+      bedroomLightIsOn = value;
+      digitalWrite(BEDROOM_LIGHT_RELAY_PIN_O, bedroomLightIsOn);
+    }
+    else if (sensor == CHILD_ACTUATOR_ID_SCONCE1_LIGHT)
+    {
+      sconce1IsOn = value;
+      digitalWrite(SCONCE1_LIGHT_RELAY_PIN_O, sconce1IsOn);
+    }
+    else if (sensor == CHILD_ACTUATOR_ID_SCONCE2_LIGHT)
+    {
+      sconce2IsOn = value;
+      digitalWrite(SCONCE2_LIGHT_RELAY_PIN_O, sconce2IsOn);
+    }
+  }
 }
 
 void print(String text)
