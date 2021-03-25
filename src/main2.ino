@@ -6,7 +6,7 @@
 #define MY_DEBUG
 #define MY_GATEWAY_SERIAL
 
- //inverted logic for light management with 'minus' relay
+//inverted logic for light management with 'minus' relay
 #define LIGHT_IS_ON false
 #define LIGHT_IS_OFF true
 #define LIGHT_IS_ON_HA true
@@ -164,7 +164,16 @@ void presentation()
 {
     sendSketchInfo(SN, SV);
     present(CHILD_ACTUATOR_ID_HALLWAY_LIGHT, S_BINARY);
+    present(CHILD_ACTUATOR_ID_BATHROOM_FAN, S_BINARY);
+    present(CHILD_ACTUATOR_ID_BATHROOM_LIGHT, S_BINARY);
+    present(CHILD_ACTUATOR_ID_KITCHEN_MAIN, S_BINARY);
+    present(CHILD_ACTUATOR_ID_KITCHEN_ADD, S_BINARY);
+    present(CHILD_ACTUATOR_ID_KITCHEN_BACKLIGHT, S_BINARY);
     present(CHILD_ACTUATOR_ID_HALL_LIGHT, S_BINARY);
+    present(CHILD_ACTUATOR_ID_DINING_LIGHT, S_BINARY);
+    present(CHILD_ACTUATOR_ID_BEDROOM_LIGHT, S_BINARY);
+    present(CHILD_ACTUATOR_ID_SCONCE1_LIGHT, S_BINARY);
+    present(CHILD_ACTUATOR_ID_SCONCE2_LIGHT, S_BINARY);
 }
 
 void loop()
@@ -173,11 +182,29 @@ void loop()
     {
         print("Sending initial value");
         send(msgHallwayLight.set(calcStateForHA(hallwayLightIsOn)));
+        send(msgBathroomFan.set(calcStateForHA(bathroomFanIsOn)));
+        send(msgBathroomLight.set(calcStateForHA(bathroomLightIsOn)));
+        send(msgKitchenMainLight.set(calcStateForHA(kitchenMainLightIsOn)));
+        send(msgKitchenAddLight.set(calcStateForHA(kitchenAddLightIsOn)));
+        send(msgKitchenBackLight.set(calcStateForHA(kitchenBackLightIsOn)));
         send(msgHallLight.set(calcStateForHA(hallLightIsOn)));
+        send(msgDinningLight.set(calcStateForHA(diningLightIsOn)));
+        send(msgBedroomLight.set(calcStateForHA(bedroomLightIsOn)));
+        send(msgSconce1Light.set(calcStateForHA(sconce1IsOn)));
+        send(msgSconce2Light.set(calcStateForHA(sconce2IsOn)));
 
         print("Requesting initial value from controller");
         request(CHILD_ACTUATOR_ID_HALLWAY_LIGHT, V_STATUS);
+        request(CHILD_ACTUATOR_ID_BATHROOM_FAN, V_STATUS);
+        request(CHILD_ACTUATOR_ID_BATHROOM_LIGHT, V_STATUS);
+        request(CHILD_ACTUATOR_ID_KITCHEN_MAIN, V_STATUS);
+        request(CHILD_ACTUATOR_ID_KITCHEN_ADD, V_STATUS);
+        request(CHILD_ACTUATOR_ID_KITCHEN_BACKLIGHT, V_STATUS);
         request(CHILD_ACTUATOR_ID_HALL_LIGHT, V_STATUS);
+        request(CHILD_ACTUATOR_ID_DINING_LIGHT, V_STATUS);
+        request(CHILD_ACTUATOR_ID_BEDROOM_LIGHT, V_STATUS);
+        request(CHILD_ACTUATOR_ID_SCONCE1_LIGHT, V_STATUS);
+        request(CHILD_ACTUATOR_ID_SCONCE2_LIGHT, V_STATUS);
 
         connectAttemptscounter++;
         print("Connection attempt " + String(connectAttemptscounter) + " out of " + String(ACCEPTED_CONNECTION_ATTEMPTS));
@@ -310,10 +337,12 @@ bool debounce(bool last,
     return current;
 }
 
-bool calcStateFromHA(bool state) {
+bool calcStateFromHA(bool state)
+{
     return state ? LIGHT_IS_ON : LIGHT_IS_OFF;
 }
 
-bool calcStateForHA(bool state) {
+bool calcStateForHA(bool state)
+{
     return state ? LIGHT_IS_OFF_HA : LIGHT_IS_ON_HA;
 }
