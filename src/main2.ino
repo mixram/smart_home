@@ -108,7 +108,7 @@ bool sconce2IsOn = LIGHT_IS_OFF;
 /*OTHER*/
 bool printAccepted = true;
 int connectAttemptscounter = 0;
-const int ACCEPTED_CONNECTION_ATTEMPTS = 5;
+const int ACCEPTED_CONNECTION_ATTEMPTS = 20;
 bool initialValueSent = false;
 
 void before()
@@ -214,6 +214,14 @@ void loop()
 
     hallwayCurrState = debounce(hallwayLastState, BTN_HALLWAY_PIN_I);
     hallCurrState = debounce(hallLastState, BTN_HALL_PIN_I);
+    bathroom1CurrState = debounce(bathroom1LastState, BTN_BATHROOM1_PIN_I);
+    bathroom2CurrState = debounce(bathroom2LastState, BTN_BATHROOM2_PIN_I);
+    kitchenCurrState = debounce(kitchenLastState, BTN_KITCHEN_PIN_I);
+    bedroomTCurrState = debounce(bedroomTLastState, BTN_BEDROOM_T_PIN_I);
+    bedroomMCurrState = debounce(bedroomMLastState, BTN_BEDROOM_M_PIN_I);
+    bedroomBCurrState = debounce(bedroomBLastState, BTN_BEDROOM_B_PIN_I);
+    sconce1CurrState = debounce(sconce1LastState, BTN_SCONCE1_PIN_I);
+    sconce2CurrState = debounce(sconce2LastState, BTN_SCONCE2_PIN_I);
 
     /*HALLWAY+HALL*/
     if (hallwayLastState == BTN_IS_RELEASED && hallwayCurrState == BTN_IS_PRESSED)
@@ -231,6 +239,12 @@ void loop()
             {
                 hallwayLightIsOn = LIGHT_IS_OFF;
                 hallLightIsOn = LIGHT_IS_OFF;
+                bathroomLightIsOn = LIGHT_IS_OFF;
+                bathroomFanIsOn = LIGHT_IS_OFF;
+                kitchenMainLightIsOn = LIGHT_IS_OFF;
+                kitchenAddLightIsOn = LIGHT_IS_OFF;
+                kitchenBackLightIsOn = LIGHT_IS_OFF;
+                diningLightIsOn = LIGHT_IS_OFF;
             }
             else
             {
@@ -245,6 +259,264 @@ void loop()
 
         send(msgHallwayLight.set(calcStateForHA(hallwayLightIsOn)), true);
         send(msgHallLight.set(calcStateForHA(hallLightIsOn)), true);
+        send(msgBathroomLight.set(calcStateForHA(bathroomLightIsOn), true));
+        send(msgBathroomFan.set(calcStateForHA(bathroomFanIsOn), true));
+        send(msgKitchenMainLight.set(calcStateForHA(kitchenMainLightIsOn), true));
+        send(msgKitchenAddLight.set(calcStateForHA(kitchenAddLightIsOn), true));
+        send(msgKitchenBackLight.set(calcStateForHA(kitchenBackLightIsOn), true));
+        send(msgDinningLight.set(calcStateForHA(diningLightIsOn), true));
+    }
+
+    /*HALL+DINNING*/
+    if (hallLastState == BTN_IS_RELEASED && hallCurrState == BTN_IS_PRESSED)
+    {
+        print("BTN_HALL_PIN_I is pressed.");
+
+        delay(400);
+
+        hallCurrState = debounce(hallLastState, BTN_HALL_PIN_I);
+        if (hallCurrState == BTN_IS_PRESSED)
+        {
+            print("BTN_HALL_PIN_I is still pressed!");
+
+            diningLightIsOn = !diningLightIsOn;
+            print("diningLightIsOn=" + String(diningLightIsOn));
+        }
+        else
+        {
+            hallLightIsOn = !hallLightIsOn;
+            print("hallLightIsOn=" + String(hallLightIsOn));
+        }
+
+        send(msgDinningLight.set(calcStateForHA(diningLightIsOn)), true);
+        send(msgHallLight.set(calcStateForHA(hallLightIsOn)), true);
+    }
+
+    /*BATHROOM*/
+    //botton1
+    if (bathroom1LastState == BTN_IS_RELEASED && bathroom1CurrState == BTN_IS_PRESSED)
+    {
+        print("BTN_BATHROOM1_PIN_I is pressed.");
+
+        delay(400);
+
+        bathroom1CurrState = debounce(bathroom1LastState, BTN_BATHROOM1_PIN_I);
+        if (bathroom1CurrState == BTN_IS_PRESSED)
+        {
+            Serial.println("BTN_BATHROOM1_PIN_I is still pressed!");
+
+            bathroomFanIsOn = !bathroomFanIsOn;
+            print("bathroomFanIsOn=" + String(bathroomFanIsOn));
+        }
+        else
+        {
+            bathroomLightIsOn = !bathroomLightIsOn;
+            print("bathroomLightIsOn=" + String(bathroomLightIsOn));
+        }
+
+        send(msgBathroomFan.set(calcStateForHA(bathroomFanIsOn)), true);
+        send(msgBathroomLight.set(calcStateForHA(bathroomLightIsOn)), true);
+    }
+    //botton2
+    if (bathroom2LastState == BTN_IS_RELEASED && bathroom2CurrState == BTN_IS_PRESSED)
+    {
+        print("BTN_BATHROOM2_PIN_I is pressed.");
+
+        delay(400);
+
+        bathroom2CurrState = debounce(bathroom2LastState, BTN_BATHROOM2_PIN_I);
+        if (bathroom2CurrState == BTN_IS_PRESSED)
+        {
+            print("BTN_BATHROOM2_PIN_I is still pressed!");
+
+            bathroomFanIsOn = !bathroomFanIsOn;
+        }
+        else
+        {
+            bathroomLightIsOn = !bathroomLightIsOn;
+        }
+
+        send(msgBathroomFan.set(calcStateForHA(bathroomFanIsOn)), true);
+        send(msgBathroomLight.set(calcStateForHA(bathroomLightIsOn)), true);
+    }
+
+    /*KITCHEN*/
+    //if now pressed and previously was released - I may do needed logic.
+    if (kitchenLastState == BTN_IS_RELEASED && kitchenCurrState == BTN_IS_PRESSED)
+    {
+        print("BTN_KITCHEN_PIN_I is pressed.");
+
+        //wait to check if button still pressed
+        delay(400);
+
+        kitchenCurrState = debounce(kitchenLastState, BTN_KITCHEN_PIN_I);
+        if (kitchenCurrState == BTN_IS_PRESSED)
+        {
+            print("BTN_KITCHEN_PIN_I is still pressed!");
+
+            //if we are here - it means "long-press" logic should be switched on/off
+            kitchenAddLightIsOn = !kitchenAddLightIsOn;
+
+            //wait to check if button still pressed
+            delay(400);
+
+            kitchenCurrState = debounce(kitchenLastState, BTN_KITCHEN_PIN_I);
+            if (kitchenCurrState == BTN_IS_PRESSED)
+            {
+                print("BTN_KITCHEN_PIN_I is STILL pressed!");
+
+                //if we are here - it means "long-long-press" logic should be switched on/off
+                kitchenAddLightIsOn = !kitchenAddLightIsOn;
+                kitchenBackLightIsOn = !kitchenBackLightIsOn;
+            }
+        }
+        else
+        {
+            //if we are here - it means "short-press" logic should be switched on/off
+            kitchenMainLightIsOn = !kitchenMainLightIsOn;
+            print("kitchenMainLightIsOn=" + String(kitchenMainLightIsOn));
+        }
+
+        send(msgKitchenAddLight.set(calcStateForHA(kitchenAddLightIsOn)), true);
+        send(msgKitchenBackLight.set(calcStateForHA(kitchenBackLightIsOn)), true);
+        send(msgKitchenMainLight.set(calcStateForHA(kitchenMainLightIsOn)), true);
+    }
+
+    /*BEDROOM+SCONCES*/
+    //buttonT
+    if (bedroomTLastState == BTN_IS_RELEASED && bedroomTCurrState == BTN_IS_PRESSED)
+    {
+        print("BTN_BEDROOM_T_PIN_I is pressed.");
+
+        delay(400);
+
+        bedroomTCurrState = debounce(bedroomTLastState, BTN_BEDROOM_T_PIN_I);
+        if (bedroomTCurrState == BTN_IS_PRESSED)
+        {
+            print("BTN_BEDROOM_T_PIN_I is still pressed!");
+
+            if (sconce1IsOn == LIGHT_IS_ON || sconce2IsOn == LIGHT_IS_ON)
+            {
+                sconce1IsOn = LIGHT_IS_OFF;
+                sconce2IsOn = LIGHT_IS_OFF;
+            }
+            else
+            {
+                sconce1IsOn = LIGHT_IS_ON;
+                sconce2IsOn = LIGHT_IS_ON;
+            }
+        }
+        else
+        {
+            bedroomLightIsOn = !bedroomLightIsOn;
+        }
+
+        send(msgSconce1Light.set(calcStateForHA(sconce1IsOn)), true);
+        send(msgSconce2Light.set(calcStateForHA(sconce2IsOn)), true);
+        send(msgBedroomLight.set(calcStateForHA(bedroomLightIsOn)), true);
+    }
+    //buttonM
+    if (bedroomMLastState == BTN_IS_RELEASED && bedroomMCurrState == BTN_IS_PRESSED)
+    {
+        print("BTN_BEDROOM_M_PIN_I is pressed.");
+
+        delay(400);
+
+        bedroomMCurrState = debounce(bedroomMLastState, BTN_BEDROOM_M_PIN_I);
+        if (bedroomMCurrState == BTN_IS_PRESSED)
+        {
+            print("BTN_BEDROOM_M_PIN_I is still pressed!");
+
+            diningLightIsOn = !diningLightIsOn;
+        }
+        else
+        {
+            hallLightIsOn = !hallLightIsOn;
+        }
+
+        send(msgDinningLight.set(calcStateForHA(diningLightIsOn)), true);
+        send(msgHallLight.set(calcStateForHA(hallLightIsOn)), true);
+    }
+    //buttonB
+    if (bedroomBLastState == BTN_IS_RELEASED && bedroomBCurrState == BTN_IS_PRESSED)
+    {
+        print("BTN_BEDROOM_B_PIN_I is pressed.");
+
+        delay(400);
+
+        bedroomBCurrState = debounce(bedroomBLastState, BTN_BEDROOM_B_PIN_I);
+        if (bedroomBCurrState == BTN_IS_PRESSED)
+        {
+            print("BTN_BEDROOM_B_PIN_I is still pressed!");
+
+            hallwayLightIsOn = LIGHT_IS_OFF;
+            hallLightIsOn = LIGHT_IS_OFF;
+            bathroomLightIsOn = LIGHT_IS_OFF;
+            bathroomFanIsOn = LIGHT_IS_OFF;
+            kitchenMainLightIsOn = LIGHT_IS_OFF;
+            kitchenAddLightIsOn = LIGHT_IS_OFF;
+            kitchenBackLightIsOn = LIGHT_IS_ON; //need to left the kitchen backlight switched on
+            diningLightIsOn = LIGHT_IS_OFF;
+        }
+        else
+        {
+            hallwayLightIsOn = !hallwayLightIsOn;
+        }
+
+        send(msgHallwayLight.set(calcStateForHA(hallwayLightIsOn)), true);
+        send(msgHallLight.set(calcStateForHA(hallLightIsOn)), true);
+        send(msgBathroomLight.set(calcStateForHA(bathroomLightIsOn)), true);
+        send(msgBathroomFan.set(calcStateForHA(bathroomFanIsOn)), true);
+        send(msgKitchenMainLight.set(calcStateForHA(kitchenMainLightIsOn)), true);
+        send(msgKitchenAddLight.set(calcStateForHA(kitchenAddLightIsOn)), true);
+        send(msgKitchenBackLight.set(calcStateForHA(kitchenBackLightIsOn)), true);
+        send(msgDinningLight.set(calcStateForHA(diningLightIsOn)), true);
+    }
+
+    /*SCONCE1+BEDROOM*/
+    if (sconce1LastState == BTN_IS_RELEASED && sconce1CurrState == BTN_IS_PRESSED)
+    {
+        Serial.println("BTN_SCONCE1_PIN_I is pressed.");
+
+        delay(400);
+
+        sconce1CurrState = debounce(sconce1LastState, BTN_SCONCE1_PIN_I);
+        if (sconce1CurrState == BTN_IS_PRESSED)
+        {
+            print("BTN_SCONCE1_PIN_I is still pressed!");
+
+            bedroomLightIsOn = !bedroomLightIsOn;
+        }
+        else
+        {
+            sconce1IsOn = !sconce1IsOn;
+        }
+
+        send(msgBedroomLight.set(calcStateForHA(bedroomLightIsOn)), true);
+        send(msgSconce1Light.set(calcStateForHA(sconce1IsOn)), true);
+    }
+
+    /*SCONCE2+BEDROOM*/
+    if (sconce2LastState == BTN_IS_RELEASED && sconce2CurrState == BTN_IS_PRESSED)
+    {
+        print("BTN_SCONCE2_PIN_I is pressed.");
+
+        delay(400);
+
+        sconce2CurrState = debounce(sconce2LastState, BTN_SCONCE2_PIN_I);
+        if (sconce2CurrState == BTN_IS_PRESSED)
+        {
+            print("BTN_SCONCE2_PIN_I is still pressed!");
+
+            bedroomLightIsOn = !bedroomLightIsOn;
+        }
+        else
+        {
+            sconce2IsOn = !sconce2IsOn;
+        }
+
+        send(msgBedroomLight.set(calcStateForHA(bedroomLightIsOn)), true);
+        send(msgSconce2Light.set(calcStateForHA(sconce2IsOn)), true);
     }
 
     //set HALLWAY_LIGHT_RELAY_PIN_O state
@@ -306,10 +578,55 @@ void receive(const MyMessage &message)
             hallwayLightIsOn = calcStateFromHA(value);
             digitalWrite(HALLWAY_LIGHT_RELAY_PIN_O, hallwayLightIsOn);
         }
+        else if (sensor == CHILD_ACTUATOR_ID_BATHROOM_FAN)
+        {
+            bathroomFanIsOn = calcStateFromHA(value);
+            digitalWrite(BATHROOM_FAN_RELAY_PIN_O, bathroomFanIsOn);
+        }
+        else if (sensor == CHILD_ACTUATOR_ID_BATHROOM_LIGHT)
+        {
+            bathroomLightIsOn = calcStateFromHA(value);
+            digitalWrite(BATHROOM_LIGHT_RELAY_PIN_O, bathroomLightIsOn);
+        }
+        else if (sensor == CHILD_ACTUATOR_ID_KITCHEN_MAIN)
+        {
+            kitchenMainLightIsOn = calcStateFromHA(value);
+            digitalWrite(KITCHEN_MAIN_RELAY_PIN_O, kitchenMainLightIsOn);
+        }
+        else if (sensor == CHILD_ACTUATOR_ID_KITCHEN_ADD)
+        {
+            kitchenAddLightIsOn = calcStateFromHA(value);
+            digitalWrite(KITCHEN_ADD_RELAY_PIN_O, kitchenAddLightIsOn);
+        }
+        else if (sensor == CHILD_ACTUATOR_ID_KITCHEN_BACKLIGHT)
+        {
+            kitchenBackLightIsOn = calcStateFromHA(value);
+            digitalWrite(KITCHEN_BACKLIGHT_RELAY_PIN_O, kitchenBackLightIsOn);
+        }
         else if (sensor == CHILD_ACTUATOR_ID_HALL_LIGHT)
         {
             hallLightIsOn = calcStateFromHA(value);
             digitalWrite(HALL_LIGHT_RELAY_PIN_O, hallLightIsOn);
+        }
+        else if (sensor == CHILD_ACTUATOR_ID_DINING_LIGHT)
+        {
+            diningLightIsOn = calcStateFromHA(value);
+            digitalWrite(DINING_LIGHT_RELAY_PIN_O, diningLightIsOn);
+        }
+        else if (sensor == CHILD_ACTUATOR_ID_BEDROOM_LIGHT)
+        {
+            bedroomLightIsOn = calcStateFromHA(value);
+            digitalWrite(BEDROOM_LIGHT_RELAY_PIN_O, bedroomLightIsOn);
+        }
+        else if (sensor == CHILD_ACTUATOR_ID_SCONCE1_LIGHT)
+        {
+            sconce1IsOn = calcStateFromHA(value);
+            digitalWrite(SCONCE1_LIGHT_RELAY_PIN_O, sconce1IsOn);
+        }
+        else if (sensor == CHILD_ACTUATOR_ID_SCONCE2_LIGHT)
+        {
+            sconce2IsOn = calcStateFromHA(value);
+            digitalWrite(SCONCE2_LIGHT_RELAY_PIN_O, sconce2IsOn);
         }
     }
 }
@@ -337,11 +654,19 @@ bool debounce(bool last,
     return current;
 }
 
+/**
+ * Because of light and fan are operating with relay - it is necessary to invert HA response.
+ * Response 'true' means 'light on!', but for the relay signal must be 'false'. So, conversion is needed.
+ */
 bool calcStateFromHA(bool state)
 {
     return state ? LIGHT_IS_ON : LIGHT_IS_OFF;
 }
 
+/**
+ * Because of light and fan are operating with relay - it is necessary to invert state for request to HA.
+ * State 'false' means 'light on!', but for the HA state must be 'true'. So, conversion is needed.
+ */
 bool calcStateForHA(bool state)
 {
     return state ? LIGHT_IS_OFF_HA : LIGHT_IS_ON_HA;
