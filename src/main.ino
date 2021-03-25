@@ -1,7 +1,7 @@
 #define SN "OurSmartHome"
 #define SV "1.0"
 
-//My Arduino is both note and gateway (https://www.mysensors.org/about/network)
+//My Arduino is both node and gateway (https://www.mysensors.org/about/network)
 #define MY_NODE_ID 1
 #define MY_DEBUG
 #define MY_GATEWAY_SERIAL
