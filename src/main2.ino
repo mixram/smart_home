@@ -10,7 +10,7 @@
 #include <MySensors.h>
 
 /*INPUT*/
-const int BTN_HALLWAY_PIN_I = 41; //for button near the flat door
+const int BTN_HALLWAY_PIN_I = 41;   //for button near the flat door
 const int BTN_HALL_PIN_I = 37;      //for button right of the hallway door
 const int BTN_BATHROOM1_PIN_I = 33; //for button left of the bathroom door and button in the bathroom
 const int BTN_BATHROOM2_PIN_I = 22; //for button in the bathroom
@@ -23,7 +23,7 @@ const int BTN_SCONCE2_PIN_I = 46;   //for button on the brace_2
 
 /*OUTPUT*/
 //hallway relay
-const int HALLWAY_LIGHT_RELAY_PIN_O = A3; //for light in the hallway
+const int HALLWAY_LIGHT_RELAY_PIN_O = A3;     //for light in the hallway
 const int BATHROOM_FAN_RELAY_PIN_O = A5;      //for fan in the bathroom
 const int BATHROOM_LIGHT_RELAY_PIN_O = A4;    //for light in the bathroom
 const int KITCHEN_MAIN_RELAY_PIN_O = A0;      //for main light in the kitchen
@@ -38,7 +38,7 @@ const int SCONCE2_LIGHT_RELAY_PIN_O = 51; //for sconce_2 light
 
 /*SENSORS_ACTUATORS*/
 //hallway
-const int CHILD_ACTUATOR_ID_HALLWAY_LIGHT = HALLWAY_LIGHT_RELAY_PIN_O; //register light in the hallway in HA
+const int CHILD_ACTUATOR_ID_HALLWAY_LIGHT = HALLWAY_LIGHT_RELAY_PIN_O;         //register light in the hallway in HA
 const int CHILD_ACTUATOR_ID_BATHROOM_FAN = BATHROOM_FAN_RELAY_PIN_O;           //register fan in the bathroom in HA
 const int CHILD_ACTUATOR_ID_BATHROOM_LIGHT = BATHROOM_LIGHT_RELAY_PIN_O;       //register light in the bathroom in HA
 const int CHILD_ACTUATOR_ID_KITCHEN_MAIN = KITCHEN_MAIN_RELAY_PIN_O;           //register main light in the kitchen in HA
@@ -108,14 +108,43 @@ void before()
     //setting input pins
     pinMode(BTN_HALLWAY_PIN_I, INPUT);
     pinMode(BTN_HALL_PIN_I, INPUT);
+    pinMode(BTN_BATHROOM1_PIN_I, INPUT);
+    pinMode(BTN_BATHROOM2_PIN_I, INPUT);
+    pinMode(BTN_KITCHEN_PIN_I, INPUT);
+    pinMode(BTN_BEDROOM_T_PIN_I, INPUT);
+    pinMode(BTN_BEDROOM_M_PIN_I, INPUT);
+    pinMode(BTN_BEDROOM_B_PIN_I, INPUT);
+    pinMode(BTN_SCONCE1_PIN_I, INPUT);
+    pinMode(BTN_SCONCE2_PIN_I, INPUT);
 
     //setting output pins
     pinMode(HALLWAY_LIGHT_RELAY_PIN_O, OUTPUT);
     pinMode(HALL_LIGHT_RELAY_PIN_O, OUTPUT);
+    pinMode(BATHROOM_LIGHT_RELAY_PIN_O, OUTPUT);
+    pinMode(BATHROOM_FAN_RELAY_PIN_O, OUTPUT);
+    pinMode(KITCHEN_MAIN_RELAY_PIN_O, OUTPUT);
+    pinMode(KITCHEN_ADD_RELAY_PIN_O, OUTPUT);
+    pinMode(KITCHEN_BACKLIGHT_RELAY_PIN_O, OUTPUT);
+    pinMode(DINING_LIGHT_RELAY_PIN_O, OUTPUT);
+    pinMode(BEDROOM_LIGHT_RELAY_PIN_O, OUTPUT);
+    pinMode(SCONCE1_LIGHT_RELAY_PIN_O, OUTPUT);
+    pinMode(SCONCE2_LIGHT_RELAY_PIN_O, OUTPUT);
 
     //initial state
     digitalWrite(HALLWAY_LIGHT_RELAY_PIN_O, HIGH);
     digitalWrite(HALL_LIGHT_RELAY_PIN_O, HIGH);
+    digitalWrite(BATHROOM_LIGHT_RELAY_PIN_O, HIGH);
+    digitalWrite(BATHROOM_FAN_RELAY_PIN_O, HIGH);
+    digitalWrite(KITCHEN_MAIN_RELAY_PIN_O, HIGH);
+    digitalWrite(KITCHEN_ADD_RELAY_PIN_O, HIGH);
+    digitalWrite(KITCHEN_BACKLIGHT_RELAY_PIN_O, HIGH);
+    digitalWrite(DINING_LIGHT_RELAY_PIN_O, HIGH);
+    digitalWrite(BEDROOM_LIGHT_RELAY_PIN_O, HIGH);
+    digitalWrite(SCONCE1_LIGHT_RELAY_PIN_O, HIGH);
+    digitalWrite(SCONCE2_LIGHT_RELAY_PIN_O, HIGH);
+
+    //switch ON the devices
+    digitalWrite(HALL_LIGHT_RELAY_PIN_O, LOW);
 }
 
 void setup()
@@ -196,10 +225,36 @@ void loop()
     digitalWrite(HALLWAY_LIGHT_RELAY_PIN_O, hallwayLightIsOn);
     //set HALL_LIGHT_RELAY_PIN_O state
     digitalWrite(HALL_LIGHT_RELAY_PIN_O, hallLightIsOn);
+    //set BATHROOM_LIGHT_RELAY_PIN_O state
+    digitalWrite(BATHROOM_LIGHT_RELAY_PIN_O, bathroomLightIsOn);
+    //set BATHROOM_FAN_RELAY_PIN_O state
+    digitalWrite(BATHROOM_FAN_RELAY_PIN_O, bathroomFanIsOn);
+    //set KITCHEN_MAIN_RELAY_PIN_O state
+    digitalWrite(KITCHEN_MAIN_RELAY_PIN_O, kitchenMainLightIsOn);
+    //set KITCHEN_ADD_RELAY_PIN_O state
+    digitalWrite(KITCHEN_ADD_RELAY_PIN_O, kitchenAddLightIsOn);
+    //set KITCHEN_BACKLIGHT_RELAY_PIN_O state
+    digitalWrite(KITCHEN_BACKLIGHT_RELAY_PIN_O, kitchenBackLightIsOn);
+    //set DINING_LIGHT_RELAY_PIN_O state
+    digitalWrite(DINING_LIGHT_RELAY_PIN_O, diningLightIsOn);
+    //set BEDROOM_LIGHT_RELAY_PIN_O state
+    digitalWrite(BEDROOM_LIGHT_RELAY_PIN_O, bedroomLightIsOn);
+    //set SCONCE1_LIGHT_RELAY_PIN_O state
+    digitalWrite(SCONCE1_LIGHT_RELAY_PIN_O, sconce1IsOn);
+    //set SCONCE2_LIGHT_RELAY_PIN_O state
+    digitalWrite(SCONCE2_LIGHT_RELAY_PIN_O, sconce2IsOn);
 
     //save current button state to use on the next loop
     hallwayLastState = hallwayCurrState;
     hallLastState = hallCurrState;
+    bathroom1LastState = bathroom1CurrState;
+    bathroom2LastState = bathroom1CurrState;
+    kitchenLastState = kitchenCurrState;
+    bedroomTLastState = bedroomTCurrState;
+    bedroomMLastState = bedroomMCurrState;
+    bedroomBLastState = bedroomBCurrState;
+    sconce1LastState = sconce1CurrState;
+    sconce2LastState = sconce2CurrState;
 }
 
 void receive(const MyMessage &message)
