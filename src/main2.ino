@@ -6,6 +6,14 @@
 #define MY_DEBUG
 #define MY_GATEWAY_SERIAL
 
+ //inverted logic for light management with 'minus' relay
+#define LIGHT_IS_ON false
+#define LIGHT_IS_OFF true
+#define LIGHT_IS_ON_HA true
+#define LIGHT_IS_OFF_HA false
+#define BTN_IS_PRESSED HIGH
+#define BTN_IS_RELEASED LOW
+
 #include <Arduino.h>
 #include <MySensors.h>
 
@@ -63,39 +71,39 @@ MyMessage msgSconce1Light(CHILD_ACTUATOR_ID_SCONCE1_LIGHT, V_STATUS);
 MyMessage msgSconce2Light(CHILD_ACTUATOR_ID_SCONCE2_LIGHT, V_STATUS);
 
 /*INPUTS STATES*/
-bool hallwayLastState = LOW;
-bool hallwayCurrState = LOW;
-bool hallLastState = LOW;
-bool hallCurrState = LOW;
-bool bathroom1LastState = LOW;
-bool bathroom1CurrState = LOW;
-bool bathroom2LastState = LOW;
-bool bathroom2CurrState = LOW;
-bool kitchenLastState = LOW;
-bool kitchenCurrState = LOW;
-bool bedroomTLastState = LOW;
-bool bedroomTCurrState = LOW;
-bool bedroomMLastState = LOW;
-bool bedroomMCurrState = LOW;
-bool bedroomBLastState = LOW;
-bool bedroomBCurrState = LOW;
-bool sconce1LastState = LOW;
-bool sconce1CurrState = LOW;
-bool sconce2LastState = LOW;
-bool sconce2CurrState = LOW;
+bool hallwayLastState = BTN_IS_RELEASED;
+bool hallwayCurrState = BTN_IS_RELEASED;
+bool hallLastState = BTN_IS_RELEASED;
+bool hallCurrState = BTN_IS_RELEASED;
+bool bathroom1LastState = BTN_IS_RELEASED;
+bool bathroom1CurrState = BTN_IS_RELEASED;
+bool bathroom2LastState = BTN_IS_RELEASED;
+bool bathroom2CurrState = BTN_IS_RELEASED;
+bool kitchenLastState = BTN_IS_RELEASED;
+bool kitchenCurrState = BTN_IS_RELEASED;
+bool bedroomTLastState = BTN_IS_RELEASED;
+bool bedroomTCurrState = BTN_IS_RELEASED;
+bool bedroomMLastState = BTN_IS_RELEASED;
+bool bedroomMCurrState = BTN_IS_RELEASED;
+bool bedroomBLastState = BTN_IS_RELEASED;
+bool bedroomBCurrState = BTN_IS_RELEASED;
+bool sconce1LastState = BTN_IS_RELEASED;
+bool sconce1CurrState = BTN_IS_RELEASED;
+bool sconce2LastState = BTN_IS_RELEASED;
+bool sconce2CurrState = BTN_IS_RELEASED;
 
 /*OUTPUTS STATES*/
-bool hallwayLightIsOn = true;
-bool hallLightIsOn = false; //because the light is engaged in start script
-bool bathroomLightIsOn = true;
-bool bathroomFanIsOn = true;
-bool kitchenMainLightIsOn = true;
-bool kitchenAddLightIsOn = true;
-bool kitchenBackLightIsOn = true;
-bool diningLightIsOn = true;
-bool bedroomLightIsOn = true;
-bool sconce1IsOn = true;
-bool sconce2IsOn = true;
+bool hallwayLightIsOn = LIGHT_IS_OFF;
+bool hallLightIsOn = LIGHT_IS_ON; //because the light is engaged in start script
+bool bathroomLightIsOn = LIGHT_IS_OFF;
+bool bathroomFanIsOn = LIGHT_IS_OFF;
+bool kitchenMainLightIsOn = LIGHT_IS_OFF;
+bool kitchenAddLightIsOn = LIGHT_IS_OFF;
+bool kitchenBackLightIsOn = LIGHT_IS_OFF;
+bool diningLightIsOn = LIGHT_IS_OFF;
+bool bedroomLightIsOn = LIGHT_IS_OFF;
+bool sconce1IsOn = LIGHT_IS_OFF;
+bool sconce2IsOn = LIGHT_IS_OFF;
 
 /*OTHER*/
 bool printAccepted = true;
@@ -131,34 +139,25 @@ void before()
     pinMode(SCONCE2_LIGHT_RELAY_PIN_O, OUTPUT);
 
     //initial state
-    digitalWrite(HALLWAY_LIGHT_RELAY_PIN_O, HIGH);
-    digitalWrite(HALL_LIGHT_RELAY_PIN_O, HIGH);
-    digitalWrite(BATHROOM_LIGHT_RELAY_PIN_O, HIGH);
-    digitalWrite(BATHROOM_FAN_RELAY_PIN_O, HIGH);
-    digitalWrite(KITCHEN_MAIN_RELAY_PIN_O, HIGH);
-    digitalWrite(KITCHEN_ADD_RELAY_PIN_O, HIGH);
-    digitalWrite(KITCHEN_BACKLIGHT_RELAY_PIN_O, HIGH);
-    digitalWrite(DINING_LIGHT_RELAY_PIN_O, HIGH);
-    digitalWrite(BEDROOM_LIGHT_RELAY_PIN_O, HIGH);
-    digitalWrite(SCONCE1_LIGHT_RELAY_PIN_O, HIGH);
-    digitalWrite(SCONCE2_LIGHT_RELAY_PIN_O, HIGH);
+    digitalWrite(HALLWAY_LIGHT_RELAY_PIN_O, LIGHT_IS_OFF);
+    digitalWrite(HALL_LIGHT_RELAY_PIN_O, LIGHT_IS_OFF);
+    digitalWrite(BATHROOM_LIGHT_RELAY_PIN_O, LIGHT_IS_OFF);
+    digitalWrite(BATHROOM_FAN_RELAY_PIN_O, LIGHT_IS_OFF);
+    digitalWrite(KITCHEN_MAIN_RELAY_PIN_O, LIGHT_IS_OFF);
+    digitalWrite(KITCHEN_ADD_RELAY_PIN_O, LIGHT_IS_OFF);
+    digitalWrite(KITCHEN_BACKLIGHT_RELAY_PIN_O, LIGHT_IS_OFF);
+    digitalWrite(DINING_LIGHT_RELAY_PIN_O, LIGHT_IS_OFF);
+    digitalWrite(BEDROOM_LIGHT_RELAY_PIN_O, LIGHT_IS_OFF);
+    digitalWrite(SCONCE1_LIGHT_RELAY_PIN_O, LIGHT_IS_OFF);
+    digitalWrite(SCONCE2_LIGHT_RELAY_PIN_O, LIGHT_IS_OFF);
 
     //switch ON the devices
-    digitalWrite(HALL_LIGHT_RELAY_PIN_O, LOW);
+    digitalWrite(HALL_LIGHT_RELAY_PIN_O, LIGHT_IS_ON);
 }
 
 void setup()
 {
     Serial.begin(9600);
-
-    pinMode(13, OUTPUT);
-    digitalWrite(13, HIGH);
-    delay(500);
-    digitalWrite(13, LOW);
-    delay(500);
-    digitalWrite(13, HIGH);
-    delay(500);
-    digitalWrite(13, LOW);
 }
 
 void presentation()
@@ -173,8 +172,8 @@ void loop()
     if (!initialValueSent && connectAttemptscounter < ACCEPTED_CONNECTION_ATTEMPTS)
     {
         print("Sending initial value");
-        send(msgHallwayLight.set(hallwayLightIsOn));
-        send(msgHallLight.set(hallLightIsOn));
+        send(msgHallwayLight.set(calcStateForHA(hallwayLightIsOn)));
+        send(msgHallLight.set(calcStateForHA(hallLightIsOn)));
 
         print("Requesting initial value from controller");
         request(CHILD_ACTUATOR_ID_HALLWAY_LIGHT, V_STATUS);
@@ -190,26 +189,26 @@ void loop()
     hallCurrState = debounce(hallLastState, BTN_HALL_PIN_I);
 
     /*HALLWAY+HALL*/
-    if (hallwayLastState == LOW && hallwayCurrState == HIGH)
+    if (hallwayLastState == BTN_IS_RELEASED && hallwayCurrState == BTN_IS_PRESSED)
     {
         print("BTN_HALLWAY_PIN_I is pressed.");
 
         delay(400);
 
         hallwayCurrState = debounce(hallwayLastState, BTN_HALLWAY_PIN_I);
-        if (hallwayCurrState == HIGH)
+        if (hallwayCurrState == BTN_IS_PRESSED)
         {
             print("BTN_HALLWAY_PIN_I is still pressed!");
 
-            if (hallwayLightIsOn == false || hallLightIsOn == false)
+            if (hallwayLightIsOn == LIGHT_IS_ON || hallLightIsOn == LIGHT_IS_ON)
             {
-                hallwayLightIsOn = true;
-                hallLightIsOn = true;
+                hallwayLightIsOn = LIGHT_IS_OFF;
+                hallLightIsOn = LIGHT_IS_OFF;
             }
             else
             {
-                hallwayLightIsOn = false;
-                hallLightIsOn = false;
+                hallwayLightIsOn = LIGHT_IS_ON;
+                hallLightIsOn = LIGHT_IS_ON;
             }
         }
         else
@@ -217,8 +216,8 @@ void loop()
             hallwayLightIsOn = !hallwayLightIsOn;
         }
 
-        send(msgHallwayLight.set(hallwayLightIsOn), true);
-        send(msgHallLight.set(hallLightIsOn), true);
+        send(msgHallwayLight.set(calcStateForHA(hallwayLightIsOn)), true);
+        send(msgHallLight.set(calcStateForHA(hallLightIsOn)), true);
     }
 
     //set HALLWAY_LIGHT_RELAY_PIN_O state
@@ -277,14 +276,12 @@ void receive(const MyMessage &message)
 
         if (sensor == CHILD_ACTUATOR_ID_HALLWAY_LIGHT)
         {
-            hallwayLightIsOn = value;
+            hallwayLightIsOn = calcStateFromHA(value);
             digitalWrite(HALLWAY_LIGHT_RELAY_PIN_O, hallwayLightIsOn);
-
-            hallwayLastState = !hallwayLastState;
         }
         else if (sensor == CHILD_ACTUATOR_ID_HALL_LIGHT)
         {
-            hallLightIsOn = value;
+            hallLightIsOn = calcStateFromHA(value);
             digitalWrite(HALL_LIGHT_RELAY_PIN_O, hallLightIsOn);
         }
     }
@@ -311,4 +308,12 @@ bool debounce(bool last,
     }
 
     return current;
+}
+
+bool calcStateFromHA(bool state) {
+    return state ? LIGHT_IS_ON : LIGHT_IS_OFF;
+}
+
+bool calcStateForHA(bool state) {
+    return state ? LIGHT_IS_OFF_HA : LIGHT_IS_ON_HA;
 }
